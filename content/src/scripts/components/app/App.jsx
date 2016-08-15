@@ -2,40 +2,23 @@ import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import clickTranslator from '../../clickTranslator'
 import _ from 'underscore'
+import styles from './App.less'
+import {VelocityTransitionGroup} from 'velocity-react'
+import {TransitionMotion, spring, presets} from 'react-motion'
+import tooltipLayoutComputer from './tooltipLayoutComputer'
 
-const TOOLTIP_WIDTH = 395
-const TOOLTIP_HEIGHT = 200
-const TOOLTIP_MARGIN = 12
-
-/**
- * @param {Object} wordBoundingClientRect
- * @return A new boundingClientRect of tooltip indicates resonable postion and width on the current page.
- */
-const tooltipLayoutComputer = (wordBoundingClientRect) => {
-  const {
-    innerWidth: iw,
-    innerHeight: ih,
-  } = window
-  const {
-    width: ww,
-    height: wh,
-    left: wl,
-    top: wt,
-  } = wordBoundingClientRect
-  const [wordCenterLeft, wordCenterTop] = [wl + ww / 2, wt + wh / 2]
-
-  const width = Math.min(iw * 0.8, TOOLTIP_WIDTH)
-  const height = TOOLTIP_HEIGHT
-  // left is restrained by both sides
-  const left = Math.min(Math.max(TOOLTIP_MARGIN, wordCenterLeft - width / 2), iw - TOOLTIP_MARGIN - width)
-  const top = wordCenterTop + TOOLTIP_MARGIN
-
-  return {
-    width,
-    height,
-    left,
-    top,
-  }
+const tooltipEnterAnimation = {
+  animation: {
+    opacity: 1,
+    scale: [1, 0],
+  },
+  duration: 300,
+}
+const tooltipLeaveAnimation = {
+  animation: {
+    opacity: 0,
+  },
+  duration: 300,
 }
 
 class App extends Component {
@@ -43,7 +26,7 @@ class App extends Component {
     super(props)
 
     this.state = {
-      tooltipLayout: null,
+      tooltipLayouts: [],
     }
   }
   componentDidMount() {
@@ -54,23 +37,62 @@ class App extends Component {
   }
 
   // Handler
-  handleWordClicked(boundingClientRect){
-    const tooltipLayout = tooltipLayoutComputer(boundingClientRect)
-    this.setState({
-      tooltipLayout,
-    })
+  handleWordClicked(boundingClientRect, text) {
+    if (typeof text === "string" && text.length > 0) {
+      const tooltipLayout = tooltipLayoutComputer.tooltipLayoutComputer(boundingClientRect)
+      this.setState({
+        tooltipLayouts: [tooltipLayout],
+      })
+    }
+  }
+  willLeave() {
+    return {
+      opacity: spring(0),
+      scale: 1,
+    }
+  }
+  willEnter() {
+    return {
+      opacity: 0,
+      scale: 0,
+    }
   }
 
+  // Render
   render() {
     const {
-      tooltipLayout
+      tooltipLayouts
     } = this.state
 
-    if (tooltipLayout) {
-      return <div style={_.extend(tooltipLayout, {backgroundColor: 'red', position: 'fixed'})}></div>
-    } else {
-      return null
-    }
+    return (
+      <TransitionMotion
+        willLeave={this.willLeave}
+        willEnter={this.willEnter}
+        styles={tooltipLayouts.map(tooltipLayout=>({
+          key: tooltipLayout.key, 
+          style: {
+            scale: spring(1, presets.wobbly),  
+            opacity: spring(1),
+          },
+          data: tooltipLayout,
+        }))}
+      >
+        {
+          interpolatedStyles => 
+            <div>
+              {interpolatedStyles.map(config=>{
+                  const tooltipStyle = tooltipLayoutComputer.getTooltipStyle(config)
+                  return (
+                    <div key={config.key} className={styles.tooltip} style={tooltipStyle.content}>
+                      <span className={styles.tri} style={tooltipStyle.tri}/>
+                    </div>
+                  )
+                })
+              }
+            </div>
+        } 
+      </TransitionMotion>
+    )
   }
 }
 

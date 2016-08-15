@@ -13,7 +13,7 @@ const subscribe = (node, cb) => {
 			const text = selection.toString()
 			const oRange = selection.getRangeAt(0)
 
-			cb && cb(oRange.getBoundingClientRect())
+			cb && cb(oRange.getBoundingClientRect(), text)
 		}
 	}
 

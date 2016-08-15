@@ -13,7 +13,7 @@ module.exports = {
   },
 
   resolve: {
-    extensions: ['', '.js', '.jsx', '.scss', '.json'],
+    extensions: ['', '.js', '.jsx', '.less', '.json'],
     modulesDirectories: ['node_modules']
   },
 
@@ -27,8 +27,8 @@ module.exports = {
         presets: ['es2015', 'react']
       }
     }, {
-      test: /\.css$/,
-      loader: "style-loader!css-loader"
+      test: /\.less$/,
+      loader: "style!css!less"
     }]
   }
 };
