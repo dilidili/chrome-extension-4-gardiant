@@ -1,4 +1,6 @@
-const path = require('path');
+const path = require('path')
+const precss = require('precss')
+const autoprefixer = require('autoprefixer')
 
 module.exports = {
 
@@ -28,7 +30,10 @@ module.exports = {
       }
     }, {
       test: /\.less$/,
-      loader: "style!css!less"
+      loader: "style!css!postcss-loader!less"
     }]
+  },
+  postcss: function() {
+    return [precss, autoprefixer];
   }
-};
+}

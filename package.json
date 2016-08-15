@@ -8,16 +8,17 @@
   },
   "author": "Brin Xu",
   "dependencies": {
+    "axios": "^0.13.1",
     "react": "^0.14.3",
     "react-chrome-redux": "0.0.7",
     "react-dom": "^0.14.3",
     "react-motion": "^0.4.4",
     "react-redux": "^4.0.0",
     "redux": "^3.0.4",
-    "underscore": "^1.8.3",
-    "velocity-react": "^1.1.5"
+    "underscore": "^1.8.3"
   },
   "devDependencies": {
+    "autoprefixer": "^6.4.0",
     "autoprefixer-loader": "^3.1.0",
     "babel-core": "^6.0.20",
     "babel-loader": "^6.0.1",
@@ -30,6 +31,8 @@
     "gulp-util": "^3.0.7",
     "less": "^2.7.1",
     "less-loader": "^2.2.3",
+    "postcss-loader": "^0.10.0",
+    "precss": "^1.4.0",
     "rimraf": "^2.5.0",
     "style-loader": "^0.13.1",
     "webpack": "^1.12.11"
