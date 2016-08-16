@@ -9,6 +9,7 @@
   "author": "Brin Xu",
   "dependencies": {
     "axios": "^0.13.1",
+    "howler": "^2.0.0",
     "react": "^0.14.3",
     "react-chrome-redux": "0.0.7",
     "react-dom": "^0.14.3",

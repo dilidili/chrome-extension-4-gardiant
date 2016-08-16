@@ -48,7 +48,7 @@ class App extends Component {
     }
   }
   componentDidMount() {
-    this._unsubscribe = clickTranslator.subscribe(document, this.handleWordClicked.bind(this))
+    this._unsubscribe = clickTranslator.subscribe(document, this.handleWordClicked.bind(this), this.handleClosePupup.bind(this))
   }
   componentWillUnmount() {
     this._unsubscribe && this._unsubscribe()
@@ -88,10 +88,18 @@ class App extends Component {
       }
     }).catch((error)=>{
       console.log(error)
+
       // network error
       this.setState({
         searchState: 3,
       })
+    })
+  }
+  handleClosePupup(){
+    this.setState({
+      searchResult: {},
+      searchState: 0,
+      tooltipLayouts: [], 
     })
   }
   willLeave() {
@@ -124,7 +132,7 @@ class App extends Component {
         styles={tooltipLayouts.map(tooltipLayout=>({
           key: tooltipLayout.key, 
           style: {
-            scale: spring(1, presets.wobbly),  
+            scale: spring(1, { stiffness: 170, damping: 15 }),  
             opacity: spring(1),
           },
           data: tooltipLayout,
@@ -137,7 +145,7 @@ class App extends Component {
                   const tooltipStyle = tooltipLayoutComputer.getTooltipStyle(config)
                   return (
                     <div key={config.key} className={styles.tooltip} style={tooltipStyle.content}>
-                      <span className={styles.tri} style={tooltipStyle.tri}/>
+                      <span className={!config.data.tri.tooltipDireactionUp?styles.tri:styles.triUpsidedown} style={tooltipStyle.tri}/>
                       <WordDescription searchState={searchState} searchResult={searchResult}></WordDescription>
                     </div>
                   )

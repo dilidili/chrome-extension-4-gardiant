@@ -1,5 +1,5 @@
 const TOOLTIP_WIDTH = 395
-const TOOLTIP_HEIGHT = 200
+const TOOLTIP_HEIGHT = 405
 const TOOLTIP_MARGIN = 12
 const TOOLTIP_TRI_LENGTH = 10
 
@@ -23,9 +23,16 @@ export default {
 
 		const width = Math.min(iw * 0.8, TOOLTIP_WIDTH)
 		const height = TOOLTIP_HEIGHT
-			// left is restrained by both sides
+		// left is restrained by both sides
 		const left = Math.min(Math.max(TOOLTIP_MARGIN, wordCenterLeft - width / 2), iw - TOOLTIP_MARGIN - width)
-		const top = wordCenterTop + TOOLTIP_MARGIN * 1.8
+		// top is restrained by top and bottom sides.
+		let top = 0
+		const tooltipDireactionUp = wordCenterTop + TOOLTIP_MARGIN * 1.8 + TOOLTIP_HEIGHT > window.innerHeight
+		if (tooltipDireactionUp) {
+			top = wordCenterTop - TOOLTIP_MARGIN * 1.8 - TOOLTIP_HEIGHT
+		} else {
+			top = wordCenterTop + TOOLTIP_MARGIN * 1.8
+		}
 
 		return {
 			content: {
@@ -37,8 +44,9 @@ export default {
 			},
 			tri: {
 				borderWidth: TOOLTIP_TRI_LENGTH,
-				top: -TOOLTIP_TRI_LENGTH+2,
+				top: !tooltipDireactionUp ? -TOOLTIP_TRI_LENGTH + 2 : TOOLTIP_HEIGHT,
 				left: wordCenterLeft - left - TOOLTIP_TRI_LENGTH,
+				tooltipDireactionUp,
 			},
 			key: Math.random().toString(32).slice(2),
 		}
