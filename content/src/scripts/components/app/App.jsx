@@ -8,6 +8,7 @@ import {TransitionMotion, spring, presets} from 'react-motion'
 import tooltipLayoutComputer from './tooltipLayoutComputer'
 import {bindActionCreators} from 'redux'
 import axios from 'axios'
+import PagingReader from './PagingReader'
 
 const tooltipEnterAnimation = {
   animation: {
@@ -126,40 +127,47 @@ class App extends Component {
     } = this.state
 
     return (
-      <TransitionMotion
-        willLeave={this.willLeave.bind(this)}
-        willEnter={this.willEnter.bind(this)}
-        styles={tooltipLayouts.map(tooltipLayout=>({
-          key: tooltipLayout.key, 
-          style: {
-            scale: spring(1, { stiffness: 170, damping: 15 }),  
-            opacity: spring(1),
-          },
-          data: tooltipLayout,
-        }))}
-      >
-        {
-          interpolatedStyles => 
-            <div>
-              {interpolatedStyles.map(config=>{
-                  const tooltipStyle = tooltipLayoutComputer.getTooltipStyle(config)
-                  return (
-                    <div key={config.key} className={styles.tooltip} style={tooltipStyle.content}>
-                      <span className={!config.data.tri.tooltipDireactionUp?styles.tri:styles.triUpsidedown} style={tooltipStyle.tri}/>
-                      <WordDescription searchState={searchState} searchResult={searchResult}></WordDescription>
-                    </div>
-                  )
-                })
-              }
-            </div>
-        } 
-      </TransitionMotion>
+      <div>
+        {/* search words tooltip */}
+        <TransitionMotion
+          willLeave={this.willLeave.bind(this)}
+          willEnter={this.willEnter.bind(this)}
+          styles={tooltipLayouts.map(tooltipLayout=>({
+            key: tooltipLayout.key, 
+            style: {
+              scale: spring(1, { stiffness: 170, damping: 15 }),  
+              opacity: spring(1),
+            },
+            data: tooltipLayout,
+          }))}
+        >
+          {
+            interpolatedStyles => 
+              <div>
+                {interpolatedStyles.map(config=>{
+                    const tooltipStyle = tooltipLayoutComputer.getTooltipStyle(config)
+                    return (
+                      <div key={config.key} className={styles.tooltip} style={tooltipStyle.content}>
+                        <span className={!config.data.tri.tooltipDireactionUp?styles.tri:styles.triUpsidedown} style={tooltipStyle.tri}/>
+                        <WordDescription searchState={searchState} searchResult={searchResult}></WordDescription>
+                      </div>
+                    )
+                  })
+                }
+              </div>
+          } 
+        </TransitionMotion>
+
+        {/* reader with paging feature */}
+        {this.props.isPagingMode?<PagingReader></PagingReader>:null}
+      </div>
     )
   }
 }
 
 const mapStateToProps = (state) => {
   return {
+    isPagingMode: state.isPagingMode,
   }
 }
 

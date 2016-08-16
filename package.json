@@ -15,6 +15,7 @@
     "react-dom": "^0.14.3",
     "react-motion": "^0.4.4",
     "react-redux": "^4.0.0",
+    "react-switch-button": "^1.1.2",
     "redux": "^3.0.4",
     "underscore": "^1.8.3"
   },
