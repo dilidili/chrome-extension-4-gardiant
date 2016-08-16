@@ -21,7 +21,7 @@ export default {
 		} = wordBoundingClientRect
 		const [wordCenterLeft, wordCenterTop] = [wl + ww / 2, wt + wh / 2]
 
-		const width = Math.min(iw * 0.8, TOOLTIP_WIDTH)
+		const width = TOOLTIP_WIDTH
 		const height = TOOLTIP_HEIGHT
 		// left is restrained by both sides
 		const left = Math.min(Math.max(TOOLTIP_MARGIN, wordCenterLeft - width / 2), iw - TOOLTIP_MARGIN - width)
@@ -44,7 +44,7 @@ export default {
 			},
 			tri: {
 				borderWidth: TOOLTIP_TRI_LENGTH,
-				top: !tooltipDireactionUp ? -TOOLTIP_TRI_LENGTH + 2 : TOOLTIP_HEIGHT,
+				top: !tooltipDireactionUp ? -TOOLTIP_TRI_LENGTH + 2 : TOOLTIP_HEIGHT - 2,
 				left: wordCenterLeft - left - TOOLTIP_TRI_LENGTH,
 				tooltipDireactionUp,
 			},
@@ -74,12 +74,12 @@ export default {
 				height: content.height * scale,
 				width: content.width * scale,
 				left: content.left + leftPartLength * (1 - scale),
-				top: content.top,
+				top: !tri.tooltipDireactionUp ? content.top : content.top + content.height * (1 - scale),
 				opacity: opacity,
 			},
 			tri: {
 				left: leftPartLength * scale - tri.borderWidth * scale / 2,
-				top: tri.top,
+				top: !tri.tooltipDireactionUp ? tri.top : tri.top + tri.borderWidth * (1 - scale),
 				opacity: opacity,
 				borderWidth: tri.borderWidth,
 			}
