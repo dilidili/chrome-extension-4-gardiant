@@ -20,9 +20,20 @@ const decorators = [{
 		}
 	},
 }, {
-	// remove sidebar ad slot
+	// just hide other unwanted nodes
 	strategy: (doc) => {
-		const targets = doc.querySelectorAll(".ad-slot-container, .js-ad-slot")
+		const blockList = ['.ad-slot-container',
+			'.js-ad-slot',
+			'.js-navigation-header',
+			'.content__labels',
+			'.content__secondary-column',
+			'.js-content-meta',
+			'.element-rich-link',
+			'.submeta',
+			'.content-footer',
+			'.l-footer',
+		]
+		const targets = doc.querySelectorAll(blockList.join(', '))
 
 		for (var i = targets.length - 1; i >= 0; i--) {
 			const target = targets[i]
@@ -30,7 +41,6 @@ const decorators = [{
 		}
 	},
 }]
-
 /**
  * Remove those ad-nodes from the document.body.
  * 
