@@ -32,7 +32,7 @@ module.exports = {
       loader: "style!css!postcss-loader!less"
     }],
     postLoaders: [{
-      loader: "transform?brfs"
+      loader: "transform/cacheable?brfs"
     }]
   },
   postcss: function() {

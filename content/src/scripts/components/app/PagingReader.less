@@ -7,10 +7,37 @@
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	font-family: 'Helvetica', sans-serif;
 
 	:local(.paper){
 		background: #fbfbfb;
 		border-width: 0.5px;
 		box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.5);
+		padding: 20px;
+	}
+
+	:local(.headline){
+		font-weight: 700;
+		font-size: 30px;
+		line-height: 1.04;
+	}
+
+	:local(.standfirst){
+		font-weight: 300;
+		font-size: 15px;
+		line-height: 1.1;
+	}
+
+	:local(.illustrationText){
+		font-weight: 300;
+		font-size: 14px;
+		line-height: 1.5;	
+		text-align: center;
+	}
+
+	:local(.line){
+		font-weight: 400;
+		font-size: 18px;
+		line-height: 1.3;	
 	}
 }

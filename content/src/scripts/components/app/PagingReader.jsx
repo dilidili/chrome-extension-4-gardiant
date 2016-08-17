@@ -5,19 +5,18 @@ import measureText from '../../measureText'
 import FontFace from '../../FontFace'
 
 const getPaperWidth = () => Math.min(window.innerWidth, 800)
-const getTextContentWidth = () => getPaperWidth() - 40
 const getPaperHeight = () => window.innerHeight - 2 * 20
+const getTextContentWidth = () => getPaperWidth() - 40
+const getTextContentHeight = () => getPaperHeight() - 40
 
-const HEADLINE_STYLE = [FontFace('Helvetica, sans-serif', null, {weight: 700}), 32, 32*1.04]
-const STANDFIRST_STYLE = [FontFace('Helvetica, sans-serif', null, {weight: 300}), 23, 23*1.22]
-const CONTENT_STYLE = [FontFace('Helvetica, sans-serif', null, {weight: 400}), 18, 18*1.5]
-const ILLUSTRATION_STYLE = [FontFace('Helvetica, sans-serif', null, {weight: 300}), 14, 14*1.5]
+const HEADLINE_STYLE = [FontFace('Helvetica, sans-serif', null, {weight: 700}), 30, 30*1.04]
+const STANDFIRST_STYLE = [FontFace('Helvetica, sans-serif', null, {weight: 300}), 15, 15*1.1]
+const CONTENT_STYLE = [FontFace('Helvetica, sans-serif', null, {weight: 400}), 18, 18*1.3]
+const ILLUSTRATION_STYLE = [FontFace('Helvetica, sans-serif', null, {weight: 300}), 14, 14*1.3]
 
 const PagingReader = React.createClass({
 	getInitialState() {
-		return {
-			content: this.parseContent(),
-		}
+		return this.computePagination()	
 	},
 
 	componentDidMount() {
@@ -27,6 +26,25 @@ const PagingReader = React.createClass({
 			evt.preventDefault()
 			evt.returnValue = false
 		})
+
+		this._updateDimension = _.debounce(this.updateDimensions, 300)
+		window.addEventListener("resize", this._updateDimension)
+	},
+	componentWillUnmount: function() {
+		window.removeEventListener("resize", this._updateDimension)
+	},
+
+	computePagination() {
+		const content = this.parseContent()
+		const pagination = this.paginate(content)
+
+		return {
+			pagination: pagination,
+			currentIndex: 1,
+		}
+	},
+	updateDimensions() {
+		this.setState(this.computePagination())
 	},
 
 	/**
@@ -81,6 +99,7 @@ const PagingReader = React.createClass({
 					src: meta.url,
 					metric: {
 						text: measureText(text, getTextContentWidth(), ...ILLUSTRATION_STYLE),
+						margin: 20,
 						illustration: {
 							width: getTextContentWidth(),
 							height: getTextContentWidth() * parseFloat(meta.height) / parseFloat(meta.width),
@@ -95,19 +114,87 @@ const PagingReader = React.createClass({
 		return {
 			headline: {
 				text: headline,
-				metric: measureText(headline, getTextContentWidth(), ...HEADLINE_STYLE),
+				height: measureText(headline, getTextContentWidth(), ...HEADLINE_STYLE).height + 15,
 			},
 			standfirst: {
 				text: standfirst,
-				metric: measureText(standfirst, getTextContentWidth(), ...STANDFIRST_STYLE),
+				height: measureText(standfirst, getTextContentWidth(), ...STANDFIRST_STYLE).height + 40,
 			},
 			content,
 		}
 	},
+	/**
+	 * According the frame of page, divide the whole content into different pages.
+	 * 
+	 * @param  {Object} content
+	 * 
+	 * @return {Array}
+	 */
+	paginate(content){
+		let key = 0
+		const width = getTextContentWidth()
+		const height = getTextContentHeight()
+		const pages = []
+		let currentPage = []
+		let currentPageAcc = 0
+
+		// add headline and standfirst.
+		currentPage.push(<div key={key++} className={styles.headline} style={{height:content.headline.height}}>{content.headline.text}</div>)
+		currentPage.push(<div key={key++} className={styles.standfirst} style={{height:content.standfirst.height}}>{content.standfirst.text}</div>)
+		currentPageAcc += (content.headline.height + content.standfirst.height)
+
+		_.each(content.content, v => {
+			switch(v.type){
+				case 'illustration':
+					// maybe squeeze the illustration lightly. 
+					const surplus = Math.max(currentPageAcc + v.metric.illustration.height - height, 0)
+
+					if (surplus / height > 0.25) {
+						pages.push(currentPage)
+						currentPage = []
+						currentPageAcc = 0
+					}
+					currentPage.push(<img key={key++} style={{width, height: v.metric.illustration.height - surplus}} src={v.src}></img>)
+
+					// add notation text
+					if (currentPageAcc + v.metric.text.height + v.metric.margin > height) {
+						pages.push(currentPage)
+						currentPage = []
+						currentPageAcc = 0
+					}
+					currentPage.push(<div key={key++} className={styles.illustrationText} style={{width, height: v.metric.text.height, marginBottom: v.metric.margin}}>{v.text}</div>)
+					currentPageAcc += v.metric.text.height + v.metric.illustration.height + v.metric.margin
+					break
+				case 'text':
+					_.map(v.metric.lines, line=>{
+						if (currentPageAcc + CONTENT_STYLE[2] > height) {
+							pages.push(currentPage)
+							currentPage = []
+							currentPageAcc = 0
+						}
+						currentPageAcc += CONTENT_STYLE[2] 
+						currentPage.push(<div key={key++} className={styles.line}>{line.text}</div>)	
+					})
+
+					// insert line break between paragraphs
+					if (currentPageAcc + CONTENT_STYLE[2] > height) {
+						pages.push(currentPage)
+						currentPage = []
+						currentPageAcc = 0
+					}
+					currentPageAcc += CONTENT_STYLE[2]
+					currentPage.push(<div key={key++} className={styles.line} style={{height: CONTENT_STYLE[2], width}}>{' '}</div>)
+					break	
+				default:
+					break	
+			}
+		})
+
+		pages.push(currentPage)
+		return pages
+	},
 
 	render(){
-		console.log(this.state)
-
 		return (
 			<div style={{
 					width: window.innerWidth,
@@ -122,6 +209,9 @@ const PagingReader = React.createClass({
 						height: getPaperHeight(),
 					}}
 				>
+					{
+						_.map(this.state.pagination[this.state.currentIndex], v => v)
+					}
 				</div>
 			</div>
 		)
