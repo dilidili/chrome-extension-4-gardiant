@@ -1,12 +1,20 @@
 import React, {PropTypes} from 'react'
 import _ from 'underscore'
 import styles from './PagingReader.less'
+import measureText from '../../measureText'
+import FontFace from '../../FontFace'
 
 const getPaperWidth = () => Math.min(window.innerWidth, 800)
+const getTextContentWidth = () => getPaperWidth() - 40
 const getPaperHeight = () => window.innerHeight - 2 * 20
 
+const HEADLINE_STYLE = [FontFace('Helvetica, sans-serif', null, {weight: 700}), 32, 32*1.04]
+const STANDFIRST_STYLE = [FontFace('Helvetica, sans-serif', null, {weight: 300}), 23, 23*1.22]
+const CONTENT_STYLE = [FontFace('Helvetica, sans-serif', null, {weight: 400}), 18, 18*1.5]
+const ILLUSTRATION_STYLE = [FontFace('Helvetica, sans-serif', null, {weight: 300}), 14, 14*1.5]
+
 const PagingReader = React.createClass({
-	getIntialState() {
+	getInitialState() {
 		return {
 			content: this.parseContent(),
 		}
@@ -41,9 +49,6 @@ const PagingReader = React.createClass({
 	 * }
 	 */
 	parseContent(){
-		const headline = document.getElementsByClassName("content__headline")[0].textContent.replace(/^\s+|\s+$/g, '')
-		const standfirst = document.getElementsByClassName("content__standfirst")[0].textContent.replace(/^\s+|\s+$/g, '')
-
 		// Extraction main content
 		const articleNode = document.getElementsByClassName("content__main-column--article")[0]
 		const content = []
@@ -52,11 +57,11 @@ const PagingReader = React.createClass({
 			if (para.nodeName === "DIV" && para.style.display !== 'none') {
 				// parse text block
 				_.each(para.children, v => {
-					console.log(v)
 					if (v.nodeName === 'P') {
 						content.push({
 							type: 'text',
 							constent: v.textContent,
+							metric: measureText(v.textContent, getTextContentWidth(), ...CONTENT_STYLE)
 						})
 					}
 				})
@@ -69,22 +74,40 @@ const PagingReader = React.createClass({
 				})
 
 				// parse illustration block
+				const text = para.textContent.replace(/^\s+|\s+$/g, '')
 				content.push({
 					type: 'illustration',
-					text: para.textContent.replace(/^\s+|\s+$/g, ''),
-					meta,
+					text,
+					src: meta.url,
+					metric: {
+						text: measureText(text, getTextContentWidth(), ...ILLUSTRATION_STYLE),
+						illustration: {
+							width: getTextContentWidth(),
+							height: getTextContentWidth() * parseFloat(meta.height) / parseFloat(meta.width),
+						},
+					},
 				})
 			}
 		})
 
+		const headline = document.getElementsByClassName("content__headline")[0].textContent.replace(/^\s+|\s+$/g, '')
+		const standfirst = document.getElementsByClassName("content__standfirst")[0].textContent.replace(/^\s+|\s+$/g, '')
 		return {
-			headline,
-			standfirst,
+			headline: {
+				text: headline,
+				metric: measureText(headline, getTextContentWidth(), ...HEADLINE_STYLE),
+			},
+			standfirst: {
+				text: standfirst,
+				metric: measureText(standfirst, getTextContentWidth(), ...STANDFIRST_STYLE),
+			},
 			content,
 		}
 	},
 
 	render(){
+		console.log(this.state)
+
 		return (
 			<div style={{
 					width: window.innerWidth,
@@ -99,7 +122,6 @@ const PagingReader = React.createClass({
 						height: getPaperHeight(),
 					}}
 				>
-								
 				</div>
 			</div>
 		)

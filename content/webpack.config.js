@@ -3,7 +3,6 @@ const precss = require('precss')
 const autoprefixer = require('autoprefixer')
 
 module.exports = {
-
   entry: [
     './content/src/scripts/index.js'
   ],
@@ -31,6 +30,9 @@ module.exports = {
     }, {
       test: /\.less$/,
       loader: "style!css!postcss-loader!less"
+    }],
+    postLoaders: [{
+      loader: "transform?brfs"
     }]
   },
   postcss: function() {
