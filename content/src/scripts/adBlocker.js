@@ -32,6 +32,8 @@ const decorators = [{
 			'.submeta',
 			'.content-footer',
 			'.l-footer',
+			'.site-message',
+			'.fsrOverlay',
 		]
 		const targets = doc.querySelectorAll(blockList.join(', '))
 
@@ -40,7 +42,19 @@ const decorators = [{
 			target.style.display = 'none'
 		}
 	},
+}, {
+	// horizontally center the article 
+	strategy: (doc) => {
+		const targets = doc.body.getElementsByClassName("content__main-column")
+
+		for (var i = targets.length - 1; i >= 0; i--) {
+			const target = targets[i]
+			target.style.marginLeft = 'auto'
+			target.style.marginRight = 'auto'
+		}
+	},
 }]
+
 /**
  * Remove those ad-nodes from the document.body.
  * 
@@ -48,7 +62,7 @@ const decorators = [{
  */
 export default (function adBlocker() {
 	return () => {
-		document.body.addEventListener("DOMNodeInserted", function (ev) {
+		document.body.addEventListener("DOMNodeInserted", function(ev) {
 			_.each(decorators, (decorator) => {
 				decorator.strategy(document)
 			})
