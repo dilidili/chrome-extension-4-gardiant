@@ -269,7 +269,7 @@ const PageNavigation = React.createClass({
 		const motionStyles = _.range(pageCount).map(pageIndex => ({
 			key: pageIndex,
 			style: {
-				scale: spring(1),
+				scale: spring(pageIndex === currentPage ? 1.6 : 1),
 			},
 		}))
 
@@ -283,11 +283,7 @@ const PageNavigation = React.createClass({
 					interpolatedStyles => 
 					<div className={styles.pageNavigation}>
 						{interpolatedStyles.map(config=>{
-							let scale = config.style.scale
-							if (this.props.currentPage === config.key) {
-								scale *= 1.6
-							}
-							const edgeLength = EDGE_LENGH * scale
+							const edgeLength = EDGE_LENGH * config.style.scale
 
 							return (
 								<span onClick={()=>{this.props.handleSwitchPage(config.key)}} className={styles.pageAnchor} key={config.key} style={{width: edgeLength, height: edgeLength, marginLeft: edgeLength*0.2, marginRight: edgeLength*0.2, fontSize: edgeLength*0.5}}>{config.key}</span>
