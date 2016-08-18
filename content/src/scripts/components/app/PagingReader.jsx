@@ -3,6 +3,7 @@ import _ from 'underscore'
 import styles from './PagingReader.less'
 import measureText from '../../measureText'
 import FontFace from '../../FontFace'
+import {TransitionMotion, spring, presets} from 'react-motion'
 
 const getPaperWidth = () => Math.min(window.innerWidth, 800)
 const getPaperHeight = () => window.innerHeight - 2 * 20
@@ -45,6 +46,12 @@ const PagingReader = React.createClass({
 	},
 	updateDimensions() {
 		this.setState(this.computePagination())
+	},
+
+	handleSwitchPage(index){
+		this.setState({
+			currentIndex: index,
+		})
 	},
 
 	/**
@@ -195,6 +202,11 @@ const PagingReader = React.createClass({
 	},
 
 	render(){
+		const {
+			pagination,
+			currentIndex,
+		} = this.state
+
 		return (
 			<div style={{
 					width: window.innerWidth,
@@ -204,18 +216,88 @@ const PagingReader = React.createClass({
 				className={styles.container}
 				ref="_container"
 			>
+				{/* render pages of this article */}
 				<div className={styles.paper}
 					style={{width: getPaperWidth(),
 						height: getPaperHeight(),
 					}}
 				>
 					{
-						_.map(this.state.pagination[this.state.currentIndex], v => v)
+						_.map(pagination[currentIndex], v => v)
 					}
 				</div>
+
+				<PageNavigation handleSwitchPage={this.handleSwitchPage} className={styles.pageNavigation} pageCount={pagination.length} currentPage={currentIndex}></PageNavigation>	
 			</div>
 		)
 	}
+})
+
+const EDGE_LENGH = 20
+const PageNavigation = React.createClass({
+	propTypes: {
+		pageCount: PropTypes.number,
+		currentPage: PropTypes.number,
+		className: PropTypes.string,
+		handleSwitchPage: PropTypes.func.isRequired,
+	},
+	getDefaultProps(){
+		return {
+			pageCount: 0,
+			currentPage: 0,
+			className: "",
+		}
+	},
+
+	willLeave() {
+		return {
+			scale: spring(0),
+		}
+	},
+	willEnter() {
+		return {
+			scale: 0,
+		}
+	},
+
+	render(){
+		const {
+			pageCount,
+			currentPage,
+			className,
+		} = this.props
+		const motionStyles = _.range(pageCount).map(pageIndex => ({
+			key: pageIndex,
+			style: {
+				scale: spring(1),
+			},
+		}))
+
+		return (
+			<TransitionMotion
+				willLeave={this.willLeave}	
+				willEnter={this.willEnter}	
+				styles={motionStyles}
+			>
+				{
+					interpolatedStyles => 
+					<div className={styles.pageNavigation}>
+						{interpolatedStyles.map(config=>{
+							let scale = config.style.scale
+							if (this.props.currentPage === config.key) {
+								scale *= 1.6
+							}
+							const edgeLength = EDGE_LENGH * scale
+
+							return (
+								<span onClick={()=>{this.props.handleSwitchPage(config.key)}} className={styles.pageAnchor} key={config.key} style={{width: edgeLength, height: edgeLength, marginLeft: edgeLength*0.2, marginRight: edgeLength*0.2, fontSize: edgeLength*0.5}}>{config.key}</span>
+							)
+						})}
+					</div>
+				}	
+			</TransitionMotion>
+		)
+	},	
 })
 
 export default PagingReader
