@@ -57,6 +57,8 @@ class App extends Component {
 
   // Handler
   handleWordClicked(boundingClientRect, text) {
+    text = text.replace(/^\s+|\s+$/g, '')
+
     if (typeof text === "string" && text.length > 0) {
       const tooltipLayout = tooltipLayoutComputer.tooltipLayoutComputer(boundingClientRect)
       tooltipLayout.text = text
