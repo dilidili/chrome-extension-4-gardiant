@@ -1,4 +1,4 @@
-#   chrome-extension-4-gardiant
+#    chrome-extension-4-gardiant
 ##  Guide
 ```
   npm install
